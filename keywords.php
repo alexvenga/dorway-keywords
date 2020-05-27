@@ -1,6 +1,6 @@
 <?php
 
-include 'vendor/autoload.php';
+include 'lib/autoload.php';
 
 use Box\Spout\Reader\Common\Creator\ReaderEntityFactory;
 
@@ -66,9 +66,9 @@ foreach ($reader->getSheetIterator() as $sheet) {
 }
 $reader->close();
 
-foreach ($row as &$item) {
-    $item = trim($item);
+foreach ($keywords as &$keyword) {
+    $keyword = implode('|', $keyword);
 }
 
-print_r($keywords);
+$fh = fopen('output.txt','w');
 
