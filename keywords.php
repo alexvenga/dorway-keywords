@@ -1,6 +1,6 @@
 <?php
 
-include 'lib/autoload.php';
+include 'vendor/autoload.php';
 
 use Box\Spout\Reader\Common\Creator\ReaderEntityFactory;
 
