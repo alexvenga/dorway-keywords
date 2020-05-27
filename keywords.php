@@ -4,7 +4,7 @@ include 'lib/autoload.php';
 
 use Box\Spout\Reader\Common\Creator\ReaderEntityFactory;
 
-echo 'Load file sites.xlsx' . PHP_EOL;
+echo PHP_EOL . 'Load file sites.xlsx' . PHP_EOL;
 $urls = [];
 $reader = ReaderEntityFactory::createReaderFromFile('sites.xlsx');
 $reader->open('sites.xlsx');
@@ -39,15 +39,19 @@ foreach ($reader->getSheetIterator() as $sheet) {
     }
 }
 $reader->close();
+echo PHP_EOL . 'LOADED ' . $i . ' urls' . PHP_EOL . PHP_EOL;
 
-echo PHP_EOL . 'LOADED ' . $i . ' urls' . PHP_EOL;
-
-
+echo 'Load file main.xlsx' . PHP_EOL;
 $reader = ReaderEntityFactory::createReaderFromFile('main.xlsx');
 $reader->open('main.xlsx');
 $keywords = [];
+$i = 0;
 foreach ($reader->getSheetIterator() as $sheet) {
     foreach ($sheet->getRowIterator() as $row) {
+        $i++;
+        if ($i % 10000) {
+            echo $i . ' ';
+        }
         $row = $row->toArray();
         foreach ($row as &$item) {
             $item = trim($item);
@@ -58,17 +62,35 @@ foreach ($reader->getSheetIterator() as $sheet) {
         if (!isset($urls[$row[1]])) {
             continue;
         }
-        if (!isset($keywords[$row[1]])) {
-            $keywords[$row[1]] = [];
+        if (!isset($keywords[$row[0]])) {
+            $keywords[$row[0]] = [];
         }
-        $keywords[$row[1]][] = $urls[$row[1]];
+        $keywords[$row[0]][] = $urls[$row[1]];
     }
 }
 $reader->close();
+echo PHP_EOL . 'LOADED ' . $i . ' keywords' . PHP_EOL . PHP_EOL;
 
-foreach ($keywords as &$keyword) {
-    $keyword = implode('|', $keyword);
+echo 'Prepare data' . PHP_EOL;
+$i = 0;
+foreach ($keywords as $key => $keyword) {
+    $keywords[$key] = $key . '|' . implode('|', $keywords[$key]);
+    $i++;
+    if ($i % 10000) {
+        echo $i . ' ';
+    }
 }
+echo PHP_EOL . 'PREPARED ' . $i . ' keywords' . PHP_EOL . PHP_EOL;
 
-$fh = fopen('output.txt','w');
-
+echo 'Save to file output.txt' . PHP_EOL;
+$i = 0;
+$fh = fopen('output.txt', 'w');
+foreach ($keywords as $value) {
+    fwrite($fh, $value . PHP_EOL);
+    $i++;
+    if ($i % 10000) {
+        echo $i . ' ';
+    }
+}
+fclose($fh);
+echo PHP_EOL . 'Saved ' . $i . ' lines' . PHP_EOL . PHP_EOL;
